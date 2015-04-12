@@ -31,7 +31,7 @@ func (k *k) DebugMode(b bool) {
 }
 
 func (k *k) Table(name string, entity interface{}, keys Keys) Table {
-	n := name + "__" + strings.Join(keys.PartitionKeys, "_") + "__" + strings.Join(keys.ClusteringColumns, "_")
+	n := name
 	m, ok := toMap(entity)
 	if !ok {
 		panic("Unrecognized row type")
@@ -60,7 +60,7 @@ func (k *k) MapTable(name, id string, row interface{}) MapTable {
 		panic("Unrecognized row type")
 	}
 	return &mapT{
-		Table: k.NewTable(fmt.Sprintf("%s_map_%s", name, id), row, m, Keys{
+		Table: k.NewTable(name, row, m, Keys{
 			PartitionKeys: []string{id},
 		}),
 		idField: id,
@@ -77,7 +77,7 @@ func (k *k) MultimapTable(name, fieldToIndexBy, id string, row interface{}) Mult
 		panic("Unrecognized row type")
 	}
 	return &multimapT{
-		Table: k.NewTable(fmt.Sprintf("%s_multimap_%s_%s", name, fieldToIndexBy, id), row, m, Keys{
+		Table: k.NewTable(name, row, m, Keys{
 			PartitionKeys:     []string{fieldToIndexBy},
 			ClusteringColumns: []string{id},
 		}),
@@ -93,7 +93,7 @@ func (k *k) TimeSeriesTable(name, timeField, idField string, bucketSize time.Dur
 	}
 	m[bucketFieldName] = time.Now()
 	return &timeSeriesT{
-		Table: k.NewTable(fmt.Sprintf("%s_timeSeries_%s_%s_%s", name, timeField, idField, bucketSize), row, m, Keys{
+		Table: k.NewTable(name, row, m, Keys{
 			PartitionKeys:     []string{bucketFieldName},
 			ClusteringColumns: []string{timeField, idField},
 		}),
@@ -110,7 +110,7 @@ func (k *k) MultiTimeSeriesTable(name, indexField, timeField, idField string, bu
 	}
 	m[bucketFieldName] = time.Now()
 	return &multiTimeSeriesT{
-		Table: k.NewTable(fmt.Sprintf("%s_multiTimeSeries_%s_%s_%s_%s", name, indexField, timeField, idField, bucketSize.String()), row, m, Keys{
+		Table: k.NewTable(name, row, m, Keys{
 			PartitionKeys:     []string{indexField, bucketFieldName},
 			ClusteringColumns: []string{timeField, idField},
 		}),
